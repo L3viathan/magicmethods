@@ -1,4 +1,4 @@
-##<a id="intro" href="#intro">Introduction</a>##
+## <a id="intro" href="#intro">Introduction</a>
 
 This guide is the culmination of a few months' worth of blog posts. The subject is **magic methods**.
 
@@ -8,7 +8,7 @@ So, to fix what I perceived as a flaw in Python's documentation, I set out to pr
 
 I hope you enjoy it. Use it as a tutorial, a refresher, or a reference; it's just intended to be a user-friendly guide to Python's magic methods.
 
-##<a id="construction" href="#construction">Construction and Initialization</a>##
+## <a id="construction" href="#construction">Construction and Initialization</a>
 
 Everyone knows the most basic magic method, `__init__`. It's the way that we can define the initialization behavior of an object. However, when I call `x = SomeClass()`, `__init__` is not the first thing to get called. Actually, it's a method called `__new__`, which actually creates the instance, then passes any arguments at creation on to the initializer. At the other end of the object's lifespan, there's `__del__`. Let's take a closer look at these 3 magic methods:
 
@@ -39,7 +39,7 @@ Putting it all together, here's an example of `__init__` and `__del__` in action
             self.file.close()
             del self.file
 
-##<a id="operators" href="#operators">Making Operators Work on Custom Classes</a>##
+## <a id="operators" href="#operators">Making Operators Work on Custom Classes</a>
 
 One of the biggest advantages of using Python's magic methods is that they provide a simple way to make objects behave like built-in types. That means you can avoid ugly, counter-intuitive, and nonstandard ways of performing basic operators. In some languages, it's common to do something like this:
 
@@ -55,7 +55,7 @@ You could certainly do this in Python, too, but this adds confusion and is unnec
 
 That's part of the power of magic methods. The vast majority of them allow us to define meaning for operators so that we can use them on our own classes just like they were built in types.
 
-###<a id="comparisons" href="#comparisons">Comparison magic methods</a>###
+### <a id="comparisons" href="#comparisons">Comparison magic methods</a>
 
 Python has a whole slew of magic methods designed to implement intuitive comparisons between objects using operators, not awkward method calls. They also provide a way to override the default Python behavior for comparisons of objects (by reference). Here's the list of those methods and what they do:
 
@@ -109,11 +109,11 @@ Now, we can create two `Word`s (by using `Word('foo')` and `Word('bar')`) and co
 
 Now would be a good time to note that you don't have to define every comparison magic method to get rich comparisons. The standard library has kindly provided us with a class decorator in the module `functools` that will define all rich comparison methods if you only define `__eq__` and one other (e.g. `__gt__`, `__lt__`, etc.) This feature is only available in Python 2.7, but when you get a chance it saves a great deal of time and effort. You can use it by placing `@total_ordering` above your class definition.
 
-###<a id="numeric" href="#numeric">Numeric magic methods</a>###
+### <a id="numeric" href="#numeric">Numeric magic methods</a>
 
 Just like you can create ways for instances of your class to be compared with comparison operators, you can define behavior for numeric operators. Buckle your seat belts, folks...there's a lot of these. For organization's sake, I've split the numeric magic methods into 5 categories: unary operators, normal arithmetic operators, reflected arithmetic operators (more on this later), augmented assignment, and type conversions.
 
-####Unary operators and functions####
+#### Unary operators and functions
 
 Unary operators and functions only have one operand, e.g. negation, absolute value, etc.
 
@@ -143,7 +143,7 @@ Unary operators and functions only have one operand, e.g. negation, absolute val
 :    Implements behavior for `math.trunc()`, i.e., truncating to an integral.
 
 
-####Normal arithmetic operators####
+#### Normal arithmetic operators
 
 Now, we cover the typical binary operators (and a function or two): +, -, * and the like. These are, for the most part, pretty self-explanatory.
 
@@ -190,7 +190,7 @@ Now, we cover the typical binary operators (and a function or two): +, -, * and 
 `__xor__(self, other)`
 :    Implements bitwise xor using the `^` operator.
 
-####Reflected arithmetic operators####
+#### Reflected arithmetic operators
 
 You know how I said I would get to reflected arithmetic in a bit? Some of you might think it's some big, scary, foreign concept. It's actually quite simple. Here's an example:
 
@@ -249,7 +249,7 @@ So, all of these magic methods do the same thing as their normal equivalents, ex
 
 
 
-####Augmented assignment####
+#### Augmented assignment
 
 Python also has a wide variety of magic methods to allow custom behavior to be defined for augmented assignment. You're probably already familiar with augmented assignment, it combines "normal" operators with assignment. If you still don't know what I'm talking about, here's an example:
 
@@ -301,7 +301,7 @@ Each of these methods should return the value that the variable on the left hand
 
 
 
-####Type conversion magic methods####
+#### Type conversion magic methods
 
 Python also has an array of magic methods designed to implement behavior for built in type conversion functions like `float()`. Here they are:
 
@@ -334,7 +334,7 @@ Python also has an array of magic methods designed to implement behavior for bui
 :    Method to implement mixed mode arithmetic. `__coerce__` should return `None` if type conversion is impossible. Otherwise, it should return a pair (2-tuple) of `self` and `other`, manipulated to have the same type.
 
 
-##<a id="representations" href="#representations">Representing your Classes</a>##
+## <a id="representations" href="#representations">Representing your Classes</a>
 
 It's often useful to have a string representation of a class. In Python, there are a few methods that you can implement in your class definition to customize how built in functions that return representations of your class behave.
 
@@ -365,7 +365,7 @@ It's often useful to have a string representation of a class. In Python, there a
 
 We're pretty much done with the boring (and example-free) part of the magic methods guide. Now that we've covered some of the more basic magic methods, it's time to move to more advanced material.
 
-##<a id="access" href="#access">Controlling Attribute Access</a>##
+## <a id="access" href="#access">Controlling Attribute Access</a>
 
 Many people coming to Python from other languages complain that it lacks true encapsulation for classes; that is, there's no way to define private attributes with public getter and setters. This couldn't be farther than the truth: it just happens that Python accomplishes a great deal of encapsulation through "magic", instead of explicit modifiers for methods or fields. Take a look:
 
@@ -421,16 +421,16 @@ So, what have we learned about custom attribute access in Python? It's not to be
                 super(AccessCounter, self).__setattr__('counter', self.counter + 1)
             super(AccessCounter, self).__delattr__(name)
 
-##<a id="sequence" href="#sequence">Making Custom Sequences</a>##
+## <a id="sequence" href="#sequence">Making Custom Sequences</a>
 
 There's a number of ways to get your Python classes to act like built in sequences (`dict`, `tuple`, `list`, `str`, etc.). These are by far my favorite magic methods in Python because of the absurd degree of control they give you and the way that they magically make a whole array of global functions work beautifully on instances of your class. But before we get down to the good stuff, a quick word on requirements.
 
-####Requirements####
+#### Requirements
 Now that we're talking about creating your own sequences in Python, it's time to talk about _protocols_. Protocols are somewhat similar to interfaces in other languages in that they give you a set of methods you must define. However, in Python protocols are totally informal and require no explicit declarations to implement. Rather, they're more like guidelines.
 
 Why are we talking about protocols now? Because implementing custom container types in Python involves using some of these protocols. First, there's the protocol for defining immutable containers: to make an immutable container, you need only define `__len__` and `__getitem__` (more on these later). The mutable container protocol requires everything that immutable containers require plus `__setitem__` and `__delitem__`. Lastly, if you want your object to be iterable, you'll have to define `__iter__`, which returns an iterator. That iterator must conform to an iterator protocol, which requires iterators to have methods called `__iter__`(returning itself) and `next`.
 
-####The magic behind containers####
+#### The magic behind containers
 
 Without any more wait, here are the magic methods that containers use:
 
@@ -459,7 +459,7 @@ Without any more wait, here are the magic methods that containers use:
 `__missing__(self, key)`
 :    `__missing__` is used in subclasses of `dict`. It defines behavior for whenever a key is accessed that does not exist in a dictionary (so, for instance, if I had a dictionary `d` and said `d["george"]` when `"george"` is not a key in the dict, `d.__missing__("george")` would be called).
 
-####An example####
+#### An example
 
 For our example, let's look at a list that implements some functional constructs that you might be used to from other languages (Haskell, for example).
 
@@ -516,7 +516,7 @@ For our example, let's look at a list that implements some functional constructs
 
 There you have it, a (marginally) useful example of how to implement your own sequence. Of course, there are more useful applications of custom sequences, but quite a few of them are already implemented in the standard library (batteries included, right?), like `Counter`, `OrderedDict`, and `NamedTuple`.
 
-##<a id="reflection" href="#reflection">Reflection</a>##
+## <a id="reflection" href="#reflection">Reflection</a>
 
 You can also control how reflection using the built in functions `isinstance()` and `issubclass()`behaves by defining magic methods. The magic methods are:
 
@@ -531,7 +531,7 @@ You can also control how reflection using the built in functions `isinstance()` 
 
 The use case for these magic methods might seem small, and that may very well be true. I won't spend too much more time on reflection magic methods because they aren't very important, but they reflect something important about object-oriented programming in Python and Python in general: there is almost always an easy way to do something, even if it's rarely necessary. These magic methods might not seem useful, but if you ever need them you'll be glad that they're there (and that you read this guide!).
 
-##<a id="callable" href="#callable">Callable Objects</a>##
+## <a id="callable" href="#callable">Callable Objects</a>
 
 As you may already know, in Python, functions are first-class objects. This means that they can be passed to functions and methods just as if they were objects of any other kind. This is an incredibly powerful feature.
 
@@ -559,7 +559,7 @@ A special magic method in Python allows instances of your classes to behave as i
 
         # snip...
 
-##<a id="context" href="#context">Context Managers</a>##
+## <a id="context" href="#context">Context Managers</a>
 
 In Python 2.5, a new keyword was introduced in Python along with a new method for code reuse: the `with` statement. The concept of context managers was hardly new in Python (it was implemented before as a part of the library), but not until [PEP 343](http://www.python.org/dev/peps/pep-0343/) was accepted did it achieve status as a first-class language construct. You may have seen `with` statements before:
 
@@ -618,11 +618,11 @@ Here's an example of `Closer` in action, using an FTP connection to demonstrate 
 
 See how our wrapper gracefully handled both proper and improper uses? That's the power of context managers and magic methods. Note that the Python standard library includes a module [contextlib](http://docs.python.org/library/contextlib.html) that contains a context manager, `contextlib.closing()`, that does approximately the same thing (without any handling of the case where an object does not have a `close()` method).
 
-##<a id="abcs" href="#abcs">Abstract Base Classes</a>##
+## <a id="abcs" href="#abcs">Abstract Base Classes</a>
 
 See http://docs.python.org/2/library/abc.html.
 
-##<a id="descriptor" href="#descriptor">Building Descriptor Objects</a>##
+## <a id="descriptor" href="#descriptor">Building Descriptor Objects</a>
 
 Descriptors are classes which, when accessed through either getting, setting, or deleting, can also alter other objects. Descriptors aren't meant to stand alone; rather, they're meant to be held by an owner class. Descriptors can be useful when building object-oriented databases or classes that have attributes whose values are dependent on each other. Descriptors are particularly useful when representing attributes in several different units of measurement or representing computed attributes (like distance from the origin in a class to represent a point on a grid).
 
@@ -666,7 +666,7 @@ Now, an example of a useful application of descriptors: unit conversions.
         meter = Meter()
         foot = Foot()
 
-##<a id="copying" href="#copying">Copying</a>##
+## <a id="copying" href="#copying">Copying</a>
 
 Sometimes, particularly when dealing with mutable objects, you want to be able to copy an object and make changes without affecting what you copied from. This is where Python's [`copy`](http://docs.python.org/library/copy.html) comes into play. However (fortunately), Python modules are not sentient, so we don't have to worry about a Linux-based robot uprising, but we do have to tell Python how to efficiently copy things.
 
@@ -678,13 +678,13 @@ Sometimes, particularly when dealing with mutable objects, you want to be able t
 
 What are some use cases for these magic methods? As always, in any case where you need more fine-grained control than what the default behavior gives you. For instance, if you are attempting to copy an object that stores a cache as a dictionary (which might be large), it might not make sense to copy the cache as well -- if the cache can be shared in memory between instances, then it should be.
 
-##<a id="pickling" href="#pickling">Pickling Your Objects</a>##
+## <a id="pickling" href="#pickling">Pickling Your Objects</a>
 
 If you spend time with other Pythonistas, chances are you've at least heard of pickling. Pickling is a serialization process for Python data structures, and can be incredibly useful when you need to store an object and retrieve it later (usually for caching). It's also a major source of worries and confusion.
 
 Pickling is so important that it doesn't just have its own module (`pickle`), but its own _protocol_ and the magic methods to go with it. But first, a brief word on how to pickle existing types(feel free to skip it if you already know).
 
-###Pickling: A Quick Soak in the Brine###
+### Pickling: A Quick Soak in the Brine
 
 Let's dive into pickling. Say you have a dictionary that you want to store and retrieve later. You couldwrite it's contents to a file, carefully making sure that you write correct syntax, then retrieve it using either `exec()` or processing the file input. But this is precarious at best: if you store important data in plain text, it could be corrupted or changed in any number of ways to make your program crash or worse run malicious code on your computer. Instead, we're going to pickle it:
 
@@ -712,7 +712,7 @@ What happens? Exactly what you expect. It's just like we had `data` all along.
 
 Now, for a word of caution: pickling is not perfect. Pickle files are easily corrupted on accident and on purpose. Pickling may be more secure than using flat text files, but it still can be used to run malicious code. It's also incompatible across different versions of Python, so don't expect to distribute pickled objects and expect people to be able to open them. However, it can also be a powerful tool for caching and other common serialization tasks.
 
-###Pickling your own Objects###
+### Pickling your own Objects
 
 Pickling isn't just for built-in types. It's for any class that follows the pickle protocol. The pickle protocol has four optional methods for Python objects to customize how they act (it's a bit different for C extensions, but that's not in our scope):
 
@@ -734,7 +734,7 @@ Pickling isn't just for built-in types. It's for any class that follows the pick
 `__reduce_ex__(self)`
 :    `__reduce_ex__` exists for compatibility. If it is defined, `__reduce_ex__` will be called over `__reduce__` on pickling. `__reduce__` can be defined as well for older versions of the pickling API that did not support `__reduce_ex__`.
 
-###An Example###
+### An Example
 
 Our example is a `Slate`, which remembers what its values have been and when those values were written to it. However, this particular slate goes blank each time it is pickled: the current value will not be saved.
 
@@ -771,6 +771,6 @@ Our example is a `Slate`, which remembers what its values have been and when tho
             self.history = state
             self.value, self.last_change = None, None
 
-##<a id="conclusion" href="#conclusion">Conclusion</a>##
+## <a id="conclusion" href="#conclusion">Conclusion</a>
 
 The goal of this guide is to bring something to anyone that reads it, regardless of their experience with Python or object-oriented programming. If you're just getting started with Python, you've gained valuable knowledge of the basics of writing feature-rich, elegant, and easy-to-use classes. If you're an intermediate Python programmer, you've probably picked up some slick new concepts and strategies and some good ways to reduce the amount of code written by you and clients. If you're an expert Pythonista, you've been refreshed on some of the stuff you might have forgotten about and maybe picked up a few new tricks along the way. Whatever your experience level, I hope that this trip through Python's special methods has been truly magical. (I couldn't resist the final pun!)
