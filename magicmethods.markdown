@@ -25,33 +25,36 @@ Everyone knows the most basic magic method, `__init__`. It's the way that we can
 
 Putting it all together, here's an example of `__init__` and `__del__` in action:
 
-    :::python
-    from os.path import join
+```python
+from os.path import join
 
-    class FileObject:
-        '''Wrapper for file objects to make sure the file gets closed on deletion.'''
+class FileObject:
+    '''Wrapper for file objects to make sure the file gets closed on deletion.'''
 
-        def __init__(self, filepath='~', filename='sample.txt'):
-            # open a file filename in filepath in read and write mode
-            self.file = open(join(filepath, filename), 'r+')
+    def __init__(self, filepath='~', filename='sample.txt'):
+        # open a file filename in filepath in read and write mode
+        self.file = open(join(filepath, filename), 'r+')
 
-        def __del__(self):
-            self.file.close()
-            del self.file
+    def __del__(self):
+        self.file.close()
+        del self.file
+```
 
 ## <a id="operators" href="#operators">Making Operators Work on Custom Classes</a>
 
 One of the biggest advantages of using Python's magic methods is that they provide a simple way to make objects behave like built-in types. That means you can avoid ugly, counter-intuitive, and nonstandard ways of performing basic operators. In some languages, it's common to do something like this:
 
-    :::python
-    if instance.equals(other_instance):
-        # do something
+```python
+if instance.equals(other_instance):
+    # do something
+```
 
 You could certainly do this in Python, too, but this adds confusion and is unnecessarily verbose. Different libraries might use different names for the same operations, making the client do way more work than necessary. With the power of magic methods, however, we can define one method (`__eq__`, in this case), and say what we _mean_ instead:
 
-    :::python
-    if instance == other_instance:
-        #do something
+```python
+if instance == other_instance:
+    #do something
+```
 
 That's part of the power of magic methods. The vast majority of them allow us to define meaning for operators so that we can use them on our own classes just like they were built in types.
 
@@ -84,26 +87,27 @@ Python has a whole slew of magic methods designed to implement intuitive compari
 
 For an example, consider a class to model a word. We might want to compare words lexicographically (by the alphabet), which is the default comparison behavior for strings, but we also might want to do it based on some other criterion, like length or number of syllables. In this example, we'll compare by length. Here's an implementation:
 
-    :::python
-    class Word(str):
-        '''Class for words, defining comparison based on word length.'''
+```python
+class Word(str):
+    '''Class for words, defining comparison based on word length.'''
 
-        def __new__(cls, word):
-            # Note that we have to use __new__. This is because str is an immutable
-            # type, so we have to initialize it early (at creation)
-            if ' ' in word:
-                print "Value contains spaces. Truncating to first space."
-                word = word[:word.index(' ')] # Word is now all chars before first space
-            return str.__new__(cls, word)
+    def __new__(cls, word):
+        # Note that we have to use __new__. This is because str is an immutable
+        # type, so we have to initialize it early (at creation)
+        if ' ' in word:
+            print "Value contains spaces. Truncating to first space."
+            word = word[:word.index(' ')] # Word is now all chars before first space
+        return str.__new__(cls, word)
 
-        def __gt__(self, other):
-            return len(self) > len(other)
-        def __lt__(self, other):
-            return len(self) < len(other)
-        def __ge__(self, other):
-            return len(self) >= len(other)
-        def __le__(self, other):
-            return len(self) <= len(other)
+    def __gt__(self, other):
+        return len(self) > len(other)
+    def __lt__(self, other):
+        return len(self) < len(other)
+    def __ge__(self, other):
+        return len(self) >= len(other)
+    def __le__(self, other):
+        return len(self) <= len(other)
+```
 
 Now, we can create two `Word`s (by using `Word('foo')` and `Word('bar')`) and compare them based on length. Note, however, that we didn't define `__eq__` and `__ne__`. This is because this would lead to some weird behavior (notably that `Word('foo') == Word('bar')` would evaluate to true). It wouldn't make sense to test for equality based on length, so we fall back on `str`'s implementation of equality.
 
@@ -194,13 +198,16 @@ Now, we cover the typical binary operators (and a function or two): +, -, * and 
 
 You know how I said I would get to reflected arithmetic in a bit? Some of you might think it's some big, scary, foreign concept. It's actually quite simple. Here's an example:
 
-    :::python
-    some_object + other
+```python
+some_object + other
+```
 
 That was "normal" addition. The reflected equivalent is the same thing, except with the operands switched around:
 
-    :::python
-    other + some_object
+
+```python
+other + some_object
+```
 
 So, all of these magic methods do the same thing as their normal equivalents, except the perform the operation with other as the first operand and self as the second, rather than the other way around. In most cases, the result of a reflected operation is the same as its normal equivalent, so you may just end up defining `__radd__` as calling `__add__` and so on. Note that the object on the left hand side of the operator (`other` in the example) must not define (or return `NotImplemented`) for its definition of the non-reflected version of an operation. For instance, in the example, `some_object.__radd__` will only be called if `other` does not define `__add__`.
 
@@ -253,9 +260,10 @@ So, all of these magic methods do the same thing as their normal equivalents, ex
 
 Python also has a wide variety of magic methods to allow custom behavior to be defined for augmented assignment. You're probably already familiar with augmented assignment, it combines "normal" operators with assignment. If you still don't know what I'm talking about, here's an example:
 
-    :::python
-    x = 5
-    x += 1 # in other words x = x + 1
+```python
+x = 5
+x += 1 # in other words x = x + 1
+```
 
 Each of these methods should return the value that the variable on the left hand side should be assigned to (for instance, for `a += b`, `__iadd__` might return `a + b`, which would be assigned to `a`). Here's the list:
 
@@ -384,42 +392,44 @@ Many people coming to Python from other languages complain that it lacks true en
 
 You can easily cause a problem in your definitions of any of the methods controlling attribute access. Consider this example:
 
-    :::python
-    def __setattr__(self, name, value):
-        self.name = value
-        # since every time an attribute is assigned, __setattr__() is called, this
-        # is recursion.
-        # so this really means self.__setattr__('name', value). Since the method
-        # keeps calling itself, the recursion goes on forever causing a crash
+```python
+def __setattr__(self, name, value):
+    self.name = value
+    # since every time an attribute is assigned, __setattr__() is called, this
+    # is recursion.
+    # so this really means self.__setattr__('name', value). Since the method
+    # keeps calling itself, the recursion goes on forever causing a crash
 
-    def __setattr__(self, name, value):
-        self.__dict__[name] = value # assigning to the dict of names in the class
-        # define custom behavior here
+def __setattr__(self, name, value):
+    self.__dict__[name] = value # assigning to the dict of names in the class
+    # define custom behavior here
+```
 
 Again, Python's magic methods are incredibly powerful, and with great power comes great responsibility. It's important to know the proper way to use magic methods so you don't break any code.
 
 So, what have we learned about custom attribute access in Python? It's not to be used lightly. In fact, it tends to be excessively powerful and counter-intuitive. But the reason why it exists is to scratch a certain itch: Python doesn't seek to make bad things impossible, but just to make them difficult. Freedom is paramount, so you can really do whatever you want. Here's an example of some of the special attribute access methods in action (note that we use `super` because not all classes have an attribute `__dict__`):
 
-    :::python
-    class AccessCounter(object):
-        '''A class that contains a value and implements an access counter.
-        The counter increments each time the value is changed.'''
+```python
+class AccessCounter(object):
+    '''A class that contains a value and implements an access counter.
+    The counter increments each time the value is changed.'''
 
-        def __init__(self, val):
-            super(AccessCounter, self).__setattr__('counter', 0)
-            super(AccessCounter, self).__setattr__('value', val)
+    def __init__(self, val):
+        super(AccessCounter, self).__setattr__('counter', 0)
+        super(AccessCounter, self).__setattr__('value', val)
 
-        def __setattr__(self, name, value):
-            if name == 'value':
-                super(AccessCounter, self).__setattr__('counter', self.counter + 1)
-            # Make this unconditional.
-            # If you want to prevent other attributes to be set, raise AttributeError(name)
-            super(AccessCounter, self).__setattr__(name, value)
+    def __setattr__(self, name, value):
+        if name == 'value':
+            super(AccessCounter, self).__setattr__('counter', self.counter + 1)
+        # Make this unconditional.
+        # If you want to prevent other attributes to be set, raise AttributeError(name)
+        super(AccessCounter, self).__setattr__(name, value)
 
-        def __delattr__(self, name):
-            if name == 'value':
-                super(AccessCounter, self).__setattr__('counter', self.counter + 1)
-            super(AccessCounter, self).__delattr__(name)
+    def __delattr__(self, name):
+        if name == 'value':
+            super(AccessCounter, self).__setattr__('counter', self.counter + 1)
+        super(AccessCounter, self).__delattr__(name)
+```
 
 ## <a id="sequence" href="#sequence">Making Custom Sequences</a>
 
@@ -463,56 +473,57 @@ Without any more wait, here are the magic methods that containers use:
 
 For our example, let's look at a list that implements some functional constructs that you might be used to from other languages (Haskell, for example).
 
-    :::python
-    class FunctionalList:
-        '''A class wrapping a list with some extra functional magic, like head,
-        tail, init, last, drop, and take.'''
+```python
+class FunctionalList:
+    '''A class wrapping a list with some extra functional magic, like head,
+    tail, init, last, drop, and take.'''
 
-        def __init__(self, values=None):
-            if values is None:
-                self.values = []
-            else:
-                self.values = values
+    def __init__(self, values=None):
+        if values is None:
+            self.values = []
+        else:
+            self.values = values
 
-        def __len__(self):
-            return len(self.values)
+    def __len__(self):
+        return len(self.values)
 
-        def __getitem__(self, key):
-            # if key is of invalid type or value, the list values will raise the error
-            return self.values[key]
+    def __getitem__(self, key):
+        # if key is of invalid type or value, the list values will raise the error
+        return self.values[key]
 
-        def __setitem__(self, key, value):
-            self.values[key] = value
+    def __setitem__(self, key, value):
+        self.values[key] = value
 
-        def __delitem__(self, key):
-            del self.values[key]
+    def __delitem__(self, key):
+        del self.values[key]
 
-        def __iter__(self):
-            return iter(self.values)
+    def __iter__(self):
+        return iter(self.values)
 
-        def __reversed__(self):
-            return reversed(self.values)
+    def __reversed__(self):
+        return reversed(self.values)
 
-        def append(self, value):
-            self.values.append(value)
-        def head(self):
-            # get the first element
-            return self.values[0]
-        def tail(self):
-            # get all elements after the first
-            return self.values[1:]
-        def init(self):
-            # get elements up to the last
-            return self.values[:-1]
-        def last(self):
-            # get last element
-            return self.values[-1]
-        def drop(self, n):
-            # get all elements except first n
-            return self.values[n:]
-        def take(self, n):
-            # get first n elements
-            return self.values[:n]
+    def append(self, value):
+        self.values.append(value)
+    def head(self):
+        # get the first element
+        return self.values[0]
+    def tail(self):
+        # get all elements after the first
+        return self.values[1:]
+    def init(self):
+        # get elements up to the last
+        return self.values[:-1]
+    def last(self):
+        # get last element
+        return self.values[-1]
+    def drop(self, n):
+        # get all elements except first n
+        return self.values[n:]
+    def take(self, n):
+        # get first n elements
+        return self.values[:n]
+```
 
 There you have it, a (marginally) useful example of how to implement your own sequence. Of course, there are more useful applications of custom sequences, but quite a few of them are already implemented in the standard library (batteries included, right?), like `Counter`, `OrderedDict`, and `NamedTuple`.
 
@@ -545,27 +556,29 @@ A special magic method in Python allows instances of your classes to behave as i
 
 `__call__` can be particularly useful in classes with instances that need to often change state. "Calling" the instance can be an intuitive and elegant way to change the object's state. An example might be a class representing an entity's position on a plane:
 
-    :::python
-    class Entity:
-        '''Class to represent an entity. Callable to update the entity's position.'''
+```python
+class Entity:
+    '''Class to represent an entity. Callable to update the entity's position.'''
 
-        def __init__(self, size, x, y):
-            self.x, self.y = x, y
-            self.size = size
+    def __init__(self, size, x, y):
+        self.x, self.y = x, y
+        self.size = size
 
-        def __call__(self, x, y):
-            '''Change the position of the entity.'''
-            self.x, self.y = x, y
+    def __call__(self, x, y):
+        '''Change the position of the entity.'''
+        self.x, self.y = x, y
 
-        # snip...
+    # snip...
+```
 
 ## <a id="context" href="#context">Context Managers</a>
 
 In Python 2.5, a new keyword was introduced in Python along with a new method for code reuse: the `with` statement. The concept of context managers was hardly new in Python (it was implemented before as a part of the library), but not until [PEP 343](http://www.python.org/dev/peps/pep-0343/) was accepted did it achieve status as a first-class language construct. You may have seen `with` statements before:
 
-    :::python
-    with open('foo.txt') as bar:
-        # perform some action with bar
+```python
+with open('foo.txt') as bar:
+    # perform some action with bar
+```
 
 Context managers allow setup and cleanup actions to be taken for objects when their creation is wrapped with a `with` statement. The behavior of the context manager is determined by two magic methods:
 
@@ -580,41 +593,43 @@ Context managers allow setup and cleanup actions to be taken for objects when th
 
 `__enter__` and `__exit__` can be useful for specific classes that have well-defined and common behavior for setup and cleanup. You can also use these methods to create generic context managers that wrap other objects. Here's an example:
 
-    :::python
-    class Closer:
-        '''A context manager to automatically close an object with a close method
-        in a with statement.'''
+```python
+class Closer:
+    '''A context manager to automatically close an object with a close method
+    in a with statement.'''
 
-        def __init__(self, obj):
-            self.obj = obj
+    def __init__(self, obj):
+        self.obj = obj
 
-        def __enter__(self):
-            return self.obj # bound to target
+    def __enter__(self):
+        return self.obj # bound to target
 
-        def __exit__(self, exception_type, exception_val, trace):
-            try:
-               self.obj.close()
-            except AttributeError: # obj isn't closable
-               print 'Not closable.'
-               return True # exception handled successfully
+    def __exit__(self, exception_type, exception_val, trace):
+        try:
+           self.obj.close()
+        except AttributeError: # obj isn't closable
+           print 'Not closable.'
+           return True # exception handled successfully
+```
 
 Here's an example of `Closer` in action, using an FTP connection to demonstrate it (a closable socket):
 
-    :::pythonconsole
-    >>> from magicmethods import Closer
-    >>> from ftplib import FTP
-    >>> with Closer(FTP('ftp.somesite.com')) as conn:
-    ...     conn.dir()
-    ...
-    # output omitted for brevity
-    >>> conn.dir()
-    # long AttributeError message, can't use a connection that's closed
-    >>> with Closer(int(5)) as i:
-    ...     i += 1
-    ...
-    Not closable.
-    >>> i
-    6
+```python
+>>> from magicmethods import Closer
+>>> from ftplib import FTP
+>>> with Closer(FTP('ftp.somesite.com')) as conn:
+...     conn.dir()
+...
+# output omitted for brevity
+>>> conn.dir()
+# long AttributeError message, can't use a connection that's closed
+>>> with Closer(int(5)) as i:
+...     i += 1
+...
+Not closable.
+>>> i
+6
+```
 
 See how our wrapper gracefully handled both proper and improper uses? That's the power of context managers and magic methods. Note that the Python standard library includes a module [contextlib](http://docs.python.org/library/contextlib.html) that contains a context manager, `contextlib.closing()`, that does approximately the same thing (without any handling of the case where an object does not have a `close()` method).
 
@@ -641,30 +656,32 @@ To be a descriptor, a class must have at least one of `__get__`, `__set__`, and 
 
 Now, an example of a useful application of descriptors: unit conversions.
 
-    :::python
-    class Meter(object):
-        '''Descriptor for a meter.'''
+```python
+class Meter(object):
+    '''Descriptor for a meter.'''
 
-        def __init__(self, value=0.0):
-            self.value = float(value)
-        def __get__(self, instance, owner):
-            return self.value
-        def __set__(self, instance, value):
-            self.value = float(value)
+    def __init__(self, value=0.0):
+        self.value = float(value)
+    def __get__(self, instance, owner):
+        return self.value
+    def __set__(self, instance, value):
+        self.value = float(value)
 
-    class Foot(object):
-        '''Descriptor for a foot.'''
+class Foot(object):
+    '''Descriptor for a foot.'''
 
-        def __get__(self, instance, owner):
-            return instance.meter * 3.2808
-        def __set__(self, instance, value):
-            instance.meter = float(value) / 3.2808
+    def __get__(self, instance, owner):
+        return instance.meter * 3.2808
+    def __set__(self, instance, value):
+        instance.meter = float(value) / 3.2808
 
-    class Distance(object):
-        '''Class to represent distance holding two descriptors for feet and
-        meters.'''
-        meter = Meter()
-        foot = Foot()
+class Distance(object):
+    '''Class to represent distance holding two descriptors for feet and
+    meters.'''
+    meter = Meter()
+    foot = Foot()
+```
+
 
 ## <a id="copying" href="#copying">Copying</a>
 
@@ -688,25 +705,27 @@ Pickling is so important that it doesn't just have its own module (`pickle`), bu
 
 Let's dive into pickling. Say you have a dictionary that you want to store and retrieve later. You couldwrite it's contents to a file, carefully making sure that you write correct syntax, then retrieve it using either `exec()` or processing the file input. But this is precarious at best: if you store important data in plain text, it could be corrupted or changed in any number of ways to make your program crash or worse run malicious code on your computer. Instead, we're going to pickle it:
 
-    :::python
-    import pickle
+```python
+import pickle
 
-    data = {'foo': [1, 2, 3],
-            'bar': ('Hello', 'world!'),
-            'baz': True}
-    jar = open('data.pkl', 'wb')
-    pickle.dump(data, jar) # write the pickled data to the file jar
-    jar.close()
+data = {'foo': [1, 2, 3],
+        'bar': ('Hello', 'world!'),
+        'baz': True}
+jar = open('data.pkl', 'wb')
+pickle.dump(data, jar) # write the pickled data to the file jar
+jar.close()
+```
 
 Now, a few hours later, we want it back. All we have to do is unpickle it:
 
-    :::python
-    import pickle
+```python
+import pickle
 
-    pkl_file = open('data.pkl', 'rb') # connect to the pickled data
-    data = pickle.load(pkl_file) # load it into a variable
-    print data
-    pkl_file.close()
+pkl_file = open('data.pkl', 'rb') # connect to the pickled data
+data = pickle.load(pkl_file) # load it into a variable
+print data
+pkl_file.close()
+```
 
 What happens? Exactly what you expect. It's just like we had `data` all along.
 
@@ -738,38 +757,39 @@ Pickling isn't just for built-in types. It's for any class that follows the pick
 
 Our example is a `Slate`, which remembers what its values have been and when those values were written to it. However, this particular slate goes blank each time it is pickled: the current value will not be saved.
 
-    :::python
-    import time
+```python
+import time
 
-    class Slate:
-        '''Class to store a string and a changelog, and forget its value when
-        pickled.'''
+class Slate:
+    '''Class to store a string and a changelog, and forget its value when
+    pickled.'''
 
-        def __init__(self, value):
-            self.value = value
-            self.last_change = time.asctime()
-            self.history = {}
+    def __init__(self, value):
+        self.value = value
+        self.last_change = time.asctime()
+        self.history = {}
 
-        def change(self, new_value):
-            # Change the value. Commit last value to history
-            self.history[self.last_change] = self.value
-            self.value = new_value
-            self.last_change = time.asctime()
+    def change(self, new_value):
+        # Change the value. Commit last value to history
+        self.history[self.last_change] = self.value
+        self.value = new_value
+        self.last_change = time.asctime()
 
-        def print_changes(self):
-            print 'Changelog for Slate object:'
-            for k, v in self.history.items():
-                print '%s\t %s' % (k, v)
+    def print_changes(self):
+        print 'Changelog for Slate object:'
+        for k, v in self.history.items():
+            print '%s\t %s' % (k, v)
 
-        def __getstate__(self):
-            # Deliberately do not return self.value or self.last_change.
-            # We want to have a "blank slate" when we unpickle.
-            return self.history
+    def __getstate__(self):
+        # Deliberately do not return self.value or self.last_change.
+        # We want to have a "blank slate" when we unpickle.
+        return self.history
 
-        def __setstate__(self, state):
-            # Make self.history = state and last_change and value undefined
-            self.history = state
-            self.value, self.last_change = None, None
+    def __setstate__(self, state):
+        # Make self.history = state and last_change and value undefined
+        self.history = state
+        self.value, self.last_change = None, None
+```
 
 ## <a id="conclusion" href="#conclusion">Conclusion</a>
 
